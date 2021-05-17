@@ -1,2 +1,2 @@
 # Pomodoro
-https://pomodoro-two.vercel.app/
+pomodorotiagogp.netlify.app
