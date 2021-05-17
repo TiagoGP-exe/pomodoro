@@ -1,2 +1,2 @@
 # Pomodoro
-pomodorotiagogp.netlify.app
+https://pomodorotiagogp.netlify.app/
