@@ -7,3 +7,7 @@
     @apply dark:bg-gray-900 bg-slate-200/60;
   }
 }
+
+input:-webkit-autofill {
+  -webkit-background-clip: text;
+}
