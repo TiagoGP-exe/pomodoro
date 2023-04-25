@@ -24,7 +24,7 @@ export const Input: FC<InputProps> = forwardRef(
           )}
 
           <input
-            ref={ref}
+            ref={ref as any}
             {...props}
             className={`w-full bg-transparent outline-none text-sm text-gray-500 dark:text-gray-400 placeholder:opacity-70  ${className}`}
           />
