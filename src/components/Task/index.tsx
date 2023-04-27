@@ -13,6 +13,7 @@ import { v4 } from "uuid";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { STORAGE_NAMES } from "@/constants/storage";
+import { Modal } from "../Modal";
 
 interface TaskProps {}
 
@@ -31,6 +32,11 @@ export const Task = () => {
   const [tasks, setTasks] = useState<TaskObject[]>([]);
   const { register, watch, reset, handleSubmit } = useForm<TaskForm>();
   const { systemTheme, theme, setTheme } = useTheme();
+  const [open, setOpen] = useState(false);
+
+  const onClose = () => {
+    setOpen(false);
+  };
 
   const task = watch("task");
 
@@ -53,11 +59,17 @@ export const Task = () => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col gap-2  w-1/2 min-h-[14rem]  border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-700/50 px-4 "
+      className="flex flex-col gap-2 w-full pt-4 md:pt-0 md:w-1/2 min-h-[14rem]  border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-700/50 px-4 relative"
     >
-      <div className="flex items-center justify-between">
+      <Modal open={open} onClose={onClose} title="Settings">
+        <div className="flex  gap-2 justify-start items-start"></div>
+      </Modal>
+      <div className="flex items-center justify-between mb-2">
         <h2 className="font-bold text-2xl ">Task</h2>
-        <button className="p-2 rounded-lg hover:bg-gray-200 hover:dark:bg-gray-800 active:scale-95 transition-transform">
+        <button
+          onClick={() => setOpen(true)}
+          className="p-2 rounded-lg hover:bg-gray-200 hover:dark:bg-gray-800 active:scale-95 transition-transform"
+        >
           <IconSettings size={18} />
         </button>
       </div>
@@ -68,16 +80,21 @@ export const Task = () => {
         className={` transition-all duration-300  ${!task && "p-1"}`}
         rightIcon={
           <div
-            className={`flex whitespace-nowrap py-2 px-4 bg-slate-200 dark:bg-slate-700 ml-2 rounded-md transition-all duration-200 pointer-events-none ${
-              !task && "opacity-0 invisible translate-x-5 scale-75 "
+            className={`flex whitespace-nowrap py-2 px-4 bg-slate-200 dark:bg-slate-700 ml-2 rounded-md transition-all duration-300  ${
+              (!task || !task?.trim()) &&
+              "translate-x-24 scale-75 opacity-0 pointer-events-none"
             }`}
           >
-            <p className="flex text-xs opacity-70">Press Enter</p>
+            <p className="flex text-xs opacity-50">Press Enter</p>
           </div>
         }
         onKeyDownCapture={(e) => {
           if (e.key === "Enter") {
             e.currentTarget.blur();
+
+            const trimValue = task?.trim();
+
+            if (!trimValue) return;
 
             const newTask = {
               id: v4(),
@@ -96,7 +113,7 @@ export const Task = () => {
         }}
       />
 
-      <ul className="flex flex-col gap-2 mt-2 max-h-48 overflow-y-scroll">
+      <ul className="flex flex-col gap-2 mt-2 h-40 overflow-y-scroll transition relative">
         {tasks
           ?.sort((a, b) => {
             if (a.completed && !b.completed) return 1;
