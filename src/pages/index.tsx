@@ -1,10 +1,11 @@
 import { Outfit } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Tabs } from "@/components/Tabs";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { IconSettings } from "tabler-icons";
 import { Task } from "@/components/Task";
 import Head from "next/head";
+import { minorOfTen } from "@/utils/minorOfTen";
 
 const outfit = Outfit({ subsets: ["latin"] });
 
@@ -25,6 +26,25 @@ const initalTimePomodoro: Record<typeOfTime, number> = {
 export default function Home() {
   const [timePomodoro, setTimePomodoro] = useState(initalTimePomodoro.pomodoro);
   const [start, setStart] = useState(false);
+  const transformNumbersInMinutes = (number: number) => {
+    const minutes = Math.floor(number / 60);
+    const seconds = number % 60;
+    return `${minorOfTen(minutes)}:${minorOfTen(seconds)}`;
+  };
+  const [timeActual, setTimeActual] = useState(timePomodoro * 60);
+
+  useMemo(() => {
+    setTimeActual(timePomodoro * 60);
+  }, [timePomodoro]);
+
+  useEffect(() => {
+    if (start) {
+      const interval = setInterval(() => {
+        setTimeActual((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [start]);
 
   const [task, setTask] = useState([""]);
 
@@ -39,9 +59,10 @@ export default function Home() {
       <Tabs
         className="mb-8 mt-4 w-full  max-w-screen-lg items-center justify-center"
         tabs={tabs}
-        customActiveTab={(id) =>
-          setTimePomodoro(initalTimePomodoro[id as typeOfTime])
-        }
+        customActiveTab={(id) => {
+          setTimePomodoro(initalTimePomodoro[id as typeOfTime]);
+          setStart(false);
+        }}
       />
       <Header />
 
@@ -49,7 +70,7 @@ export default function Home() {
         <div className="w-full md:w-1/2">
           <div className="flex items-center justify-center w-full h-36 md:h-48 bg-slate-200/50 dark:bg-slate-700/40 rounded mb-4">
             <h2 className="font-bold text-5xl md:text-7xl ">
-              {timePomodoro}:00
+              {transformNumbersInMinutes(timeActual)}
             </h2>
           </div>
 
