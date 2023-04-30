@@ -26,6 +26,7 @@ const initalTimePomodoro: Record<typeOfTime, number> = {
 export default function Home() {
   const [timePomodoro, setTimePomodoro] = useState(initalTimePomodoro.pomodoro);
   const [start, setStart] = useState(false);
+
   const transformNumbersInMinutes = (number: number) => {
     const minutes = Math.floor(number / 60);
     const seconds = number % 60;
@@ -33,18 +34,59 @@ export default function Home() {
   };
   const [timeActual, setTimeActual] = useState(timePomodoro * 60);
 
+  useEffect(() => {
+    (() => {
+      const timeActual = localStorage.getItem("timeActual");
+      if (timeActual) {
+        const { actualTime, timePomodoro, date } = JSON.parse(timeActual);
+
+        // how many minutes have passed since the last time
+        const minutesPassed = Math.floor(
+          (new Date().getTime() - new Date(date).getTime()) / 60000
+        );
+
+        if (actualTime - minutesPassed <= 0) {
+          setTimeActual(0);
+          const vlaues =
+            timePomodoro === initalTimePomodoro.pomodoro
+              ? initalTimePomodoro.shortBreak
+              : timePomodoro;
+          setTimePomodoro(timePomodoro);
+          setStart(false);
+          return;
+        }
+        setTimeActual(actualTime - minutesPassed);
+        setTimePomodoro(timePomodoro);
+        setStart(true);
+      }
+    })();
+  }, []);
+
   useMemo(() => {
     setTimeActual(timePomodoro * 60);
   }, [timePomodoro]);
 
   useEffect(() => {
     if (start) {
+      if (timeActual <= 0) {
+        setTimeActual(0);
+        setTimePomodoro(timePomodoro);
+        setStart(false);
+        return;
+      }
+
+      const newValue = {
+        actualTime: timeActual - 1,
+        timePomodoro: timePomodoro,
+        date: new Date(),
+      };
+      localStorage.setItem("timeActual", JSON.stringify(newValue));
       const interval = setInterval(() => {
         setTimeActual((prev) => prev - 1);
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [start]);
+  }, [start, timeActual, timePomodoro]);
 
   const [task, setTask] = useState([""]);
 
